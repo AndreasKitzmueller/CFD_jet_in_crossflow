@@ -14,9 +14,6 @@
 # Ignore processor directories (parallel runs)
 **/processor*/
 
-# Ignore postProcessing output
-**/postProcessing/
-
 # Ignore dynamicMesh
 **/dynamicCode/
 **/dynamicMesh/
