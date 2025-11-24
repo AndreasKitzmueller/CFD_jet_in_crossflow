@@ -1,0 +1,65 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | k: turbulent kinetic energy
+   \\    /   O peration     |
+    \\  /    A nd           |
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       volScalarField;
+    location    "0";
+    object      k;
+}
+
+dimensions      [0 2 -2 0 0 0 0];
+
+// grobe Startwerte, reichen zum Laufen; später verfeinerbar
+internalField   uniform 0.01;
+
+boundaryField
+{
+    inletMain
+    {
+        type    fixedValue;
+        value   uniform 0.01;
+    }
+
+    outlet
+    {
+        type    zeroGradient;
+    }
+
+    jetInlet
+    {
+        type    fixedValue;
+        value   uniform 0.02;   // etwas „turbulenter“ als Hauptstrom
+    }
+
+    top
+    {
+        type    kqRWallFunction;
+        value   uniform 0.01;
+    }
+
+    floor
+    {
+        type    kqRWallFunction;
+        value   uniform 0.01;
+    }
+
+    sideWalls
+    {
+        type    kqRWallFunction;
+        value   uniform 0.01;
+    }
+
+    ductWalls
+    {
+        type    kqRWallFunction;
+        value   uniform 0.01;
+    }
+}
+// ************************************************************************* //

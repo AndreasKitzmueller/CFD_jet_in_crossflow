@@ -1,0 +1,9 @@
+commands:
+
+source /opt/openfoam-dev/etc/bashrc
+
+blockMesh
+checkMesh
+icoFoam
+
+paraFoam
