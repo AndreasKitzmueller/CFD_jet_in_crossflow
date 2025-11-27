@@ -1,0 +1,192 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+|  Jet-in-crossflow: 2×1×1 box + 0.2×0.2 duct 0.2 m below floor (−y)         |
+|  Parametric, human-readable, 3×3 main blocks + 1 duct block                 |
+\*---------------------------------------------------------------------------*/
+
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      blockMeshDict;
+}
+
+convertToMeters 1;
+
+// ---------------- Parameters ----------------
+jetWidth    0.00375;    // square jet opening
+jetDepth    0.01;    // duct depth below floor
+Lx          0.05;    // domain length (x)
+Ly          0.01125;    // domain height (y)
+Lz          0.01125;    // domain width  (z)
+centerX     0.01125;    // jet center (x)
+centerZ     0.005625;    // jet center (z)
+
+// mesh resolution (balanced & matching at interfaces)
+// mesh resolution (make shared-face counts identical)
+nx_left  12;
+nx_right 40;
+ny  12;
+nz  12;
+nJetX  8;
+nDuctY 12;
+
+// -------------- Derived coords --------------
+x0  0;
+x1  #calc "$centerX - 0.5*$jetWidth";
+x2  #calc "$centerX + 0.5*$jetWidth";
+x3  $Lx;
+
+z0  0;
+z1  #calc "$centerZ - 0.5*$jetWidth";
+z2  #calc "$centerZ + 0.5*$jetWidth";
+z3  $Lz;
+
+y0  0;
+y1  $Ly;
+yD  #calc "-$jetDepth";
+
+// ---------------- Vertices ------------------
+vertices
+(
+    // floor y=0
+    ($x0 $y0 $z0)  //  0
+    ($x1 $y0 $z0)  //  1
+    ($x2 $y0 $z0)  //  2
+    ($x3 $y0 $z0)  //  3
+
+    ($x0 $y0 $z1)  //  4
+    ($x1 $y0 $z1)  //  5
+    ($x2 $y0 $z1)  //  6
+    ($x3 $y0 $z1)  //  7
+
+    ($x0 $y0 $z2)  //  8
+    ($x1 $y0 $z2)  //  9
+    ($x2 $y0 $z2)  // 10
+    ($x3 $y0 $z2)  // 11
+
+    ($x0 $y0 $z3)  // 12
+    ($x1 $y0 $z3)  // 13
+    ($x2 $y0 $z3)  // 14
+    ($x3 $y0 $z3)  // 15
+
+    // top y=1
+    ($x0 $y1 $z0)  // 16
+    ($x1 $y1 $z0)  // 17
+    ($x2 $y1 $z0)  // 18
+    ($x3 $y1 $z0)  // 19
+
+    ($x0 $y1 $z1)  // 20
+    ($x1 $y1 $z1)  // 21
+    ($x2 $y1 $z1)  // 22
+    ($x3 $y1 $z1)  // 23
+
+    ($x0 $y1 $z2)  // 24
+    ($x1 $y1 $z2)  // 25
+    ($x2 $y1 $z2)  // 26
+    ($x3 $y1 $z2)  // 27
+
+    ($x0 $y1 $z3)  // 28
+    ($x1 $y1 $z3)  // 29
+    ($x2 $y1 $z3)  // 30
+    ($x3 $y1 $z3)  // 31
+
+    // duct bottom ring at y = yD (below floor opening)
+    ($x1 $yD $z1)  // 32
+    ($x2 $yD $z1)  // 33
+    ($x2 $yD $z2)  // 34
+    ($x1 $yD $z2)  // 35
+);
+
+// ---------------- Blocks --------------------
+blocks
+(
+    // LOGIC: hex (v0 v1 v2 v3 v4 v5 v6 v7) (nx ny nz)
+    // Axis 1 (v0->v1) = Global X  (nx)
+    // Axis 2 (v1->v2) = Global Y  (ny)
+    // Axis 3 (v0->v4) = Global Z  (nz)
+
+    // --- ROW 1 (Bottom, Z = 0 to z1) ---
+    // Left
+    hex ( 0  1 17 16   4  5 21 20) ($nx_left  $ny $nz) simpleGrading (1 1 1)
+    // Jet (Middle)
+    hex ( 1  2 18 17   5  6 22 21) ($nJetX    $ny $nz) simpleGrading (1 1 1)
+    // Right
+    hex ( 2  3 19 18   6  7 23 22) ($nx_right $ny $nz) simpleGrading (1 1 1)
+
+    // --- ROW 2 (Middle, Z = z1 to z2) ---
+    // Left
+    hex ( 4  5 21 20   8  9 25 24) ($nx_left  $ny $nz) simpleGrading (1 1 1)
+    // Jet (Middle - directly over hole)
+    hex ( 5  6 22 21   9 10 26 25) ($nJetX    $ny $nz) simpleGrading (1 1 1)
+    // Right
+    hex ( 6  7 23 22  10 11 27 26) ($nx_right $ny $nz) simpleGrading (1 1 1)
+
+    // --- ROW 3 (Top, Z = z2 to z3) ---
+    // Left
+    hex ( 8  9 25 24  12 13 29 28) ($nx_left  $ny $nz) simpleGrading (1 1 1)
+    // Jet (Middle)
+    hex ( 9 10 26 25  13 14 30 29) ($nJetX    $ny $nz) simpleGrading (1 1 1)
+    // Right
+    hex (10 11 27 26  14 15 31 30) ($nx_right $ny $nz) simpleGrading (1 1 1)
+
+    // --- DUCT (Below Floor) ---
+    // Axis 1 (X): 32->33
+    // Axis 2 (Y): 33->6  (Vertical, Upwards)
+    // Axis 3 (Z): 32->35 (Depth)
+    hex (32 33  6  5  35 34 10  9) ($nJetX $nDuctY $nz) simpleGrading (1 1 1)
+);
+
+edges ();
+
+// --------------- Boundaries ----------------
+boundary
+(
+    inletMain
+    {
+        type patch;     // x = 0
+        faces ((0 16 20 4) (4 20 24 8) (8 24 28 12));
+    }
+    outlet
+    {
+        type patch;     // x = 2
+        faces ((3 7 23 19) (7 11 27 23) (11 15 31 27));
+    }
+    top
+    {
+        type wall;      // y = 1
+        faces
+        (
+            (16 17 21 20) (20 21 25 24) (24 25 29 28)
+            (17 18 22 21) (21 22 26 25) (25 26 30 29)
+            (18 19 23 22) (22 23 27 26) (26 27 31 30)
+        );
+    }
+    jetInlet
+    {
+        type patch;     // bottom of duct (y = yD)
+        faces ((32 33 34 35));
+    }
+    floor
+    {
+        type wall;      // y = 0 (excluding the hole)
+        faces
+        (
+            (0 1 5 4) (4 5 9 8) (8 9 13 12)
+            (1 2 6 5)          (9 10 14 13)
+            (2 3 7 6) (6 7 11 10) (10 11 15 14)
+        );
+    }
+    sideWalls
+    {
+        type wall;      // z = 0 and z = 1
+        faces ((0 16 17 1) (1 17 18 2) (2 18 19 3)
+               (12 28 29 13) (13 29 30 14) (14 30 31 15));
+    }
+);
+
+// four duct side faces default to wall:
+defaultPatch { name ductWalls; type wall; }
+
+mergePatchPairs();
+
