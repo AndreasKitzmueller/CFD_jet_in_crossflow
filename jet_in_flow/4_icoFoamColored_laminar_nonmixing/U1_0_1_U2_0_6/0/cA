@@ -1,0 +1,21 @@
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       volScalarField;
+    object      cA;
+}
+dimensions      [0 0 0 0 0 0 0];
+internalField   uniform 0;
+
+boundaryField
+{
+    inletMain   { type fixedValue; value uniform 1; }
+    jetInlet    { type fixedValue; value uniform 0; }
+    outlet      { type zeroGradient; }
+
+    top         { type zeroGradient; }
+    floor       { type zeroGradient; }
+    sideWalls   { type zeroGradient; }
+    ductWalls   { type zeroGradient; }
+}

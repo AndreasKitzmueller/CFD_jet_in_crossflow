@@ -1,9 +1,9 @@
 commands:
 
-source /opt/openfoam-dev/etc/bashrc
+openfoam2412
 
 blockMesh
 checkMesh
-icoFoam
+icoFoamColored > log.icoFoamColored
 
 paraFoam
