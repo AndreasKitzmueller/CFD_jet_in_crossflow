@@ -17,7 +17,7 @@ startTime       0;
 
 stopAt          endTime;
 
-endTime         0.75;             // shorter runtime for initial test
+endTime         4.0;             // shorter runtime for initial test
 
 deltaT          0.0001;          // smaller timestep for stability
 
