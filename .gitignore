@@ -22,7 +22,7 @@
 **/logs/
 
 # Ignore log.* files, because they frequently surpass the 100MB size limit (for individual files)
-log.*
+**/log.*
 
 # Ignore polyMesh directories
 **/polyMesh/
