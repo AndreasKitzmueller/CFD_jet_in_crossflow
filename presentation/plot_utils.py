@@ -394,6 +394,12 @@ def plot_polymesh_case(
 
     fig.update_layout(
         title=None,
+        width=1600,
+        height=600,
+        font=dict(
+            # global font size
+            size=16,          
+        ),
         scene=dict(
             aspectmode="data",
             xaxis_title=f"x [{u}]",
