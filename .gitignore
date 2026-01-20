@@ -27,7 +27,7 @@ log.*
 # Ignore polyMesh directories
 **/polyMesh/
 
-# Ignore runtime,contErr, residuals
-**/runtime/
-**/contErr/
-**/residuals/
+# Ignore runtime, contErr, residuals
+**/postProcessing/runtime/
+**/postProcessing/contErr/
+**/postProcessing/residuals/
