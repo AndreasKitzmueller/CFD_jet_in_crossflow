@@ -31,3 +31,7 @@ log.*
 **/postProcessing/runtime/
 **/postProcessing/contErr/
 **/postProcessing/residuals/
+
+# Ignore unimportant stuff
+**/initial_simulations/
+**/preliminary_simulations/

@@ -1,5 +1,7 @@
 commands:
 
+install costum solver for particle tracking according to instructions in "files_for_icoFoamColored" first.
+
 openfoam2412
 
 blockMesh

@@ -240,23 +240,26 @@ def _edges_polyline_coords(P, edges):
     return xs, ys, zs
 
 def plot_polymesh_case(
-    case_dir: str,
-    unit: str = "mm",
-    crease_angle_deg: float | None = 10.0,
+        case_dir: str,
+        unit: str = "mm",
+        crease_angle_deg: float | None = 10.0,
 
-    # patches to color/highlight
-    inlet_patch: str = "inletMain",
-    outlet_patch: str = "outlet",
-    jet_patch: str = "jetInlet",
+        # patches to color/highlight
+        inlet_patch: str = "inletMain",
+        outlet_patch: str = "outlet",
+        jet_patch: str = "jetInlet",
 
-    # label placement
-    label_shift_x_factor_big: float = 0.10,   # fraction of big size (move right)
-    label_shift_x_factor_jet: float = 0.20,   # fraction of jet size (move right)
-    label_lift_factor: float = 0.10,          # lift along patch normal
+        # label placement
+        label_shift_x_factor_big: float = 0.10,   # fraction of big size (move right)
+        label_shift_x_factor_jet: float = 0.20,   # fraction of jet size (move right)
+        label_lift_factor: float = 0.10,          # lift along patch normal
 
-    show_global_Lx: bool = True,
-    show_axes_labels_at_jet: bool = True,
-):
+        show_global_Lx: bool = True,
+        show_axes_labels_at_jet: bool = True,
+        fontsize = 16,
+        width = 1600,
+        height = 450
+    ):
     from pathlib import Path
 
     case_dir = Path(case_dir)
@@ -394,17 +397,20 @@ def plot_polymesh_case(
 
     fig.update_layout(
         title=None,
-        width=1600,
-        height=600,
+        width=width,
+        height=height,
         font=dict(
             # global font size
-            size=16,          
+            size=fontsize,          
         ),
         scene=dict(
             aspectmode="data",
             xaxis_title=f"x [{u}]",
             yaxis_title=f"y [{u}]",
             zaxis_title=f"z [{u}]",
+            yaxis=dict(
+                nticks=3
+            )
         ),
         margin=dict(l=0, r=0, t=0, b=0),
         showlegend=True,
