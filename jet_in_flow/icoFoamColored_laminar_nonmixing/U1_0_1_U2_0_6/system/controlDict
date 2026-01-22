@@ -1,0 +1,98 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+|  controlDict for incompressible laminar jet test (icoFoam)                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      controlDict;
+}
+
+application     icoFoamColored;        // <-- this line defines the solver
+
+startFrom       startTime;
+
+startTime       0;
+
+stopAt          endTime;
+
+endTime         20.0;             // shorter runtime for initial test
+
+deltaT          0.0001;          // smaller timestep for stability
+
+writeControl    runTime;
+writeInterval   0.01;
+
+purgeWrite      0;
+writeFormat     ascii;
+writePrecision  6;
+writeCompression off;
+timeFormat      general;
+timePrecision   6;
+
+runTimeModifiable true;
+
+functions
+{
+    // 1) Total CPU / clock time
+    runtime
+    {
+        type        timeInfo;
+        libs        ("libutilityFunctionObjects.so");
+
+        writeControl timeStep;
+        writeInterval 1;
+
+        writeToFile   yes;      // create postProcessing/timeInfo/..
+        perTimeStep   yes;       // just one final line
+        log           yes;      // also echo to terminal/log
+    }
+
+    // 2) Courant number (mean & max, plus field if you want)
+    CourantNo1
+    {
+        type        CourantNo;
+        libs        ("libfieldFunctionObjects.so");
+
+        phi         phi;
+        log         no;
+
+        writeControl runTime;         // match your main output
+        writeInterval 0.01;           // e.g. 0.01 s
+
+        writeFields  yes;             // Co field only at 0.01, 0.02, ...
+    }
+
+    // 3) Continuity error (same quantities as in your log line)
+    contErr
+    {
+        type        continuityError;
+        libs        ("libfieldFunctionObjects.so");
+
+        phi         phi;        // same flux field
+
+        writeControl timeStep;
+        writeInterval 1;
+
+        log         yes;        // also prints to its own file
+    }
+
+
+    // 4) Residuals of all fields you solve
+    residuals
+    {
+        type        solverInfo;
+        libs        ("libutilityFunctionObjects.so");
+
+        fields      (U p cA cB);    // add/remove fields as needed
+
+        writeControl timeStep;
+        writeInterval 1;
+
+        log         yes;            // residual history to its own file
+        writeResidualFields no;     // "yes" only if you want residual fields as volScalarField
+    }
+}
+
+// ************************************************************************* //
