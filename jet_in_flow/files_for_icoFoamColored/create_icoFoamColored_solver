@@ -1,23 +1,23 @@
 # ===========================
-# A) Solver duplizieren & erweitern (einmalig)
+# A) Duplicate and extend solver (once, already included in the files on GitHub)
 # ===========================
 
-# 1) Original kopieren in den User-Bereich
-#    (legt eine Kopie von icoFoam an, die wir "icoFoamColored" nennen)
+# 1) copy original to the user folder (of the OS)
+#    (makes a copy of icoFoam, which we call "icoFoamColored" (since traces are represented by colors))
 mkdir -p $WM_PROJECT_USER_DIR/applications/solvers/incompressible
 cp -r /usr/lib/openfoam/openfoam2412/applications/solvers/incompressible/icoFoam \
       $WM_PROJECT_USER_DIR/applications/solvers/incompressible/icoFoamColored
 cd $WM_PROJECT_USER_DIR/applications/solvers/incompressible/icoFoamColored
 
-# 2) Make/files setzen (Zielname & Binärpfad)
-#    Inhalt der Datei Make/files GENAU so setzen:
+# 2) Create file "icoFoamColored/Make/files" (target name & binary path)
+#    Copy EXACTLY the text inbetween the --- lines "icoFoamColored/Make/files":
 #    --------------------------------------------
 #    icoFoam.C
 #    EXE = $(FOAM_USER_APPBIN)/icoFoamColored
 #    --------------------------------------------
 
-# 3) createFields.H erweitern (2 Tracer + Diffusivität)
-#    Nach den Standardfeldern (nu, p, U, phi, setRefCell, mesh.setFluxRequired…) einfügen:
+# 3) extend Fields.H (2 tracer + diffusivity)
+#    paste after the default fields (nu, p, U, phi, setRefCell, mesh.setFluxRequired…):
 #    ---------------------------------------------------------------------------
 #    // --- Passive tracer fields for coloring two streams
 #    volScalarField cA
@@ -34,15 +34,15 @@ cd $WM_PROJECT_USER_DIR/applications/solvers/incompressible/icoFoamColored
 #        mesh, dimensionedScalar("zero", dimless, 0)
 #    );
 #
-#    // Diffusivität (m^2/s): 0 = nur Advektion; 1e-8..1e-6 für Glättung
-#    // Variante A: fester Wert
+#    // Diffusivity (m^2/s): 0 = only advection; 1e-8..1e-6 for smoothing
+#    // variant A: fixed value
 #    dimensionedScalar D("D", dimensionSet(0,2,-1,0,0,0,0), 0);
-#    // Variante B (optional): aus transportProperties lesen
+#    // variant B (optional): read from transportProperties
 #    // dimensionedScalar D("D", dimViscosity, transportProperties);
 #    ---------------------------------------------------------------------------
 
-# 4) icoFoam.C – Tracer-Gleichungen einmal pro Zeitschritt lösen
-#    Nach der PISO-Schleife, VOR runTime.write(); einfügen:
+# 4) icoFoam.C –  solve tracer equations once per time step
+#    insert after the PISO loop, BEFORE runTime.write();:
 #    ---------------------------------------------------------------------------
 #    // --- Passive tracer transport (once per time step)
 #    {
@@ -54,30 +54,30 @@ cd $WM_PROJECT_USER_DIR/applications/solvers/incompressible/icoFoamColored
 #    }
 #    ---------------------------------------------------------------------------
 #
-#    (Optional, nützlich zum Prüfen: gleich am Anfang der Zeitschleife eine Log-Zeile)
+#    (Optional, useful for checking: a log line directly at the beginning of the time loop)
 #    ---------------------------------------------------------------------------
 #    Info<< ">>> icoFoamColored: tracer build active <<<" << endl;
 #    ---------------------------------------------------------------------------
 
-# 5) Bauen
+# 5) Building
 wclean
 wmake
 
-# Prüfen, ob das Binary existiert:
+# Check if the binary exists:
 which icoFoamColored
 ls -l ~/OpenFOAM/$USER-v2412/platforms/linux64GccDPInt32Opt/bin/icoFoamColored
 
 
 # ===========================
-# B) Case-Dateien (pro Fall)
+# B) case files (per case)
 # ===========================
-# Angenommene Patches (aus boundary):
-#   inletMain (Strom A), jetInlet (Strom B), outlet,
-#   Wände: top, floor, sideWalls, ductWalls
+# Assumed patches (from boundary):
+#   inletMain (inflow A), jetInlet (inflow B), outlet,
+#   walls: top, floor, sideWalls, ductWalls
 #
-# Hinweis: 0/cA und 0/cB sind FELD-Dateien (volScalarField) im Zeitordner 0/.
-# fvSchemes/fvSolution/controlDict liegen in system/.
-# transportProperties liegt in constant/.
+# Note: 0/cA and 0/cB are FIELD files (volScalarField) in folder 0/ (time step 0).
+# fvSchemes/fvSolution/controlDict are in system/.
+# transportProperties is in constant/.
 
 # --------------------------------------------------
 # 1) 0/cA
@@ -112,10 +112,10 @@ ls -l ~/OpenFOAM/$USER-v2412/platforms/linux64GccDPInt32Opt/bin/icoFoamColored
 #     sideWalls   { type zeroGradient; }
 #     ductWalls   { type zeroGradient; }
 # }
-# (Wenn A/B vertauscht sein sollen: die 1/0 an den Inlets tauschen.)
+# (If A/B are exchanged: switch the 1/0 at the inlets.)
 
 # --------------------------------------------------
-# 3) system/fvSchemes  (laminar, minimal sauber)
+# 3) system/fvSchemes  (laminar, minimal, clean)
 # --------------------------------------------------
 # FoamFile{version 2.0; format ascii; class dictionary; object fvSchemes;}
 # ddtSchemes        { default backward; }
@@ -162,8 +162,6 @@ ls -l ~/OpenFOAM/$USER-v2412/platforms/linux64GccDPInt32Opt/bin/icoFoamColored
 # --------------------------------------------------
 # 5) constant/transportProperties
 # --------------------------------------------------
-# Variante A (D fest im Solver = 0) → nichts weiter nötig.
-# Variante B (D aus Dict lesen) → ergänzen:
-# D   [0 2 -1 0 0 0 0]  0;    # oder z.B. 1e-8 für leichte Glättung
-
-
+# variant A (D fixed in solver = 0) → nothing more needed.
+# variant B (read D from Dict) → add:
+# D   [0 2 -1 0 0 0 0]  0;    # or e.g. 1e-8 for slight smoothing
